@@ -1,9 +1,6 @@
 package com.mpdeveloper.cardstudy.controller;
 
 import java.util.List;
-import java.util.Optional;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,44 +12,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mpdeveloper.cardstudy.entity.Card;
-import com.mpdeveloper.cardstudy.model.CardRepository;
+import com.mpdeveloper.cardstudy.service.CardService;
 
 @RestController
 @RequestMapping({"/api/v1/card"})
 public class CardController {
-    private CardRepository repository;
+    private CardService service;
 
-    public CardController(CardRepository repository) {
-        this.repository = repository;
+    public CardController(CardService service) {
+        this.service = service;
     }
 
     @GetMapping
-    public List findAll(){
-        return repository.findAll();
+    public List<Card> findAll(){
+        return service.getALL();
     }
 
     @PostMapping
     public Card CreateCard(@RequestBody Card card){
-        return repository.save(card);
+        return service.Create(card);
     }
 
     @PutMapping(value = "/{id}")
     public ResponseEntity update(@PathVariable("id") Integer id, @RequestBody Card card){
-        return repository.findById(id)
-        .map(e -> {
-            e.setTitulo(card.getTitulo());
-            e.setConteudo(card.getConteudo());
-            Card update = repository.save(e);
-            return ResponseEntity.ok().body(update);
-        }).orElse(ResponseEntity.notFound().build());
+        return service.update(id, card);
     }
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity delete(@PathVariable Integer id){
-        return repository.findById(id)
-        .map(e -> {
-            repository.deleteById(id);
-            return ResponseEntity.status(HttpStatus.ACCEPTED).build();
-        }).orElse(ResponseEntity.notFound().build());
+        return service.delete(id);
     }
 }
